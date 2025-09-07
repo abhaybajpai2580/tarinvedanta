@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <!-- MOST IMPORTANT: Viewport Meta Tag for Responsive Design -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <title>Training Center - Q&A Input</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        /* --- Base Professional Styling --- */
+        html {
+            box-sizing: border-box;
+        }
+        *, *:before, *:after {
+            box-sizing: inherit;
+        }
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f4f7f9;
+            color: #333;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-image: linear-gradient(to right top, #6d60a5, #7a6eaf, #877cb9, #948bc3, #a19ace, #a3a8d4, #a6b6da, #acc3df, #b0c9e1, #b7cfe2, #c0d5e3, #c9dbe4);
+        }
+        .main-container {
+            width: 100%; max-width: 600px; background: white; border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); overflow: hidden; display: flex; flex-direction: column; height: 85vh;
+        }
+        header {
+            background-color: #5A67D8; color: white; padding: 20px; text-align: center;
+        }
+        header h1 {
+            font-family: 'Montserrat', sans-serif; margin: 0; font-size: 1.8em;
+        }
+        .chat-container { flex-grow: 1; padding: 15px; overflow-y: auto; } /* Reduced padding slightly */
+        .message { margin-bottom: 15px; display: flex; flex-direction: column; }
+        .message .bubble { padding: 12px 18px; border-radius: 20px; max-width: 80%; line-height: 1.5; word-wrap: break-word; }
+        .bot-message { align-items: flex-start; }
+        .bot-message .bubble { background-color: #e9eaf0; color: #333; border-bottom-left-radius: 5px; }
+        .user-message { align-items: flex-end; }
+        .user-message .bubble { background-color: #5A67D8; color: white; border-bottom-right-radius: 5px; }
+        .input-area { display: flex; padding: 10px; border-top: 1px solid #e0e0e0; background-color: #fff; align-items: center; }
+        #user-input { flex-grow: 1; border: 1px solid #ccc; border-radius: 25px; padding: 10px 20px; font-size: 1em; outline: none; transition: border-color 0.3s; }
+        #user-input:focus { border-color: #5A67D8; }
+        .action-btn { background-color: #5A67D8; color: white; border: none; border-radius: 50%; width: 45px; height: 45px; /* Slightly smaller buttons */ margin-left: 8px; font-size: 1.4em; cursor: pointer; transition: background-color 0.3s; display:flex; justify-content:center; align-items:center; flex-shrink: 0; }
+        .action-btn:hover { background-color: #434190; }
+
+        /* --- Bulk Add Modal Styles --- */
+        .modal {
+            display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%;
+            overflow: auto; background-color: rgba(0,0,0,0.5);
+        }
+        .modal-content {
+            background-color: #fefefe; margin: 10% auto; padding: 20px; border: 1px solid #888;
+            width: 80%; max-width: 700px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #ddd; padding-bottom: 10px; }
+        .modal-header h2 { font-size: 1.2em; }
+        .close-btn { color: #aaa; font-size: 28px; font-weight: bold; cursor: pointer; }
+        .close-btn:hover { color: black; }
+        #bulk-input { width: 100%; height: 250px; margin-top: 15px; font-size: 1em; padding: 10px; border: 1px solid #ccc; border-radius: 5px; }
+        #save-bulk-btn { background-color: #4CAF50; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; float: right; margin-top: 10px; }
+        #save-bulk-btn:hover { background-color: #45a049; }
+        .modal-instructions { font-size: 0.9em; color: #666; background-color: #f0f0f0; padding: 10px; border-radius: 5px; margin-top: 10px;}
+
+        /* --- MOBILE-FRIENDLY STYLES (MEDIA QUERY) --- */
+        /* Yeh styles tabhi apply honge jab screen ki width 600px ya usse kam hogi */
+        @media screen and (max-width: 600px) {
+            body {
+                /* Remove centering for full-screen app feel */
+                align-items: flex-start;
+            }
+            .main-container {
+                height: 100vh; /* Full screen height */
+                width: 100vw;  /* Full screen width */
+                border-radius: 0; /* Remove rounded corners */
+                box-shadow: none; /* Remove shadow */
+            }
+            header h1 {
+                font-size: 1.4em; /* Slightly smaller heading */
+            }
+            .chat-container {
+                padding: 10px; /* Reduce padding to save space */
+            }
+            .modal-content {
+                width: 95%; /* Make modal wider on small screens */
+                margin: 5% auto; /* Reduce top margin */
+            }
+             #bulk-input {
+                height: 200px; /* Reduce textarea height */
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <!-- ... (Rest of the HTML is exactly the same) ... -->
+        <header><h1>Welcome to Vedanta AI Training</h1></header>
+        <div class="chat-container" id="chat-box"></div>
+        <form class="input-area" id="chat-form">
+            <input type="text" id="user-input" placeholder="Yahan likhein..." autocomplete="off">
+            <button type="button" id="bulk-add-btn" class="action-btn" title="Bulk Add Q&A" style="font-size: 1.8em; padding-bottom: 5px;">+</button>
+            <button type="submit" id="send-btn" class="action-btn">&#10148;</button>
+        </form>
+    </div>
+
+    <div id="bulk-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Bulk me Questions & Answers Daalein</h2>
+                <span class="close-btn">&times;</span>
+            </div>
+            <p class="modal-instructions">
+                <b>Format:</b> Har question aur answer ko alag line me number daal kar likhein. Example:<br>
+                <code>1. Aapka naam kya hai?</code><br>
+                <code>1. Mera naam Training Bot hai.</code>
+            </p>
+            <textarea id="bulk-input" placeholder="Yahan apne questions aur answers upar diye format me likhein..."></textarea>
+            <button id="save-bulk-btn">Save Karein</button>
+        </div>
+    </div>
+
+    <!-- Firebase SDKs and JavaScript Logic (Exactly the same as before) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getFirestore, collection, addDoc, query, where, getDocs, writeBatch } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+        // Firebase config and all JavaScript logic from the previous step goes here...
+        // ... (No changes needed in the JavaScript part) ...
+        const firebaseConfig = {
+            apiKey: "AIzaSyCObH7AuDF7hsmB5MApkh96QdP8nrDutis", authDomain: "vedanta-bdeb2.firebaseapp.com", projectId: "vedanta-bdeb2",
+            storageBucket: "vedanta-bdeb2.firebasestorage.app", messagingSenderId: "574876644812", appId: "1:574876644812:web:a8c0a36d588f482b62d969",
+            measurementId: "G-TTT70Q0JHE"
+        };
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        const chatBox = document.getElementById('chat-box');
+        const chatForm = document.getElementById('chat-form');
+        const userInput = document.getElementById('user-input');
+        let conversationState = 'waiting_for_question';
+        let userQuestionToSave = '';
+
+        const bulkModal = document.getElementById('bulk-modal');
+        const bulkAddBtn = document.getElementById('bulk-add-btn');
+        const closeBtn = document.querySelector('.close-btn');
+        const saveBulkBtn = document.getElementById('save-bulk-btn');
+        const bulkInput = document.getElementById('bulk-input');
+
+        bulkAddBtn.onclick = () => { bulkModal.style.display = 'block'; }
+        closeBtn.onclick = () => { bulkModal.style.display = 'none'; }
+        window.onclick = (event) => { if (event.target == bulkModal) { bulkModal.style.display = 'none'; } }
+        
+        function addMessage(text, sender) {
+            const messageDiv = document.createElement('div'); messageDiv.className = `message ${sender}-message`;
+            const bubbleDiv = document.createElement('div'); bubbleDiv.className = 'bubble'; bubbleDiv.innerText = text;
+            messageDiv.appendChild(bubbleDiv); chatBox.appendChild(messageDiv); chatBox.scrollTop = chatBox.scrollHeight;
+        };
+        async function checkIfQuestionExists(questionText) {
+            const q = query(collection(db, "qna_data"), where("question", "==", questionText));
+            const querySnapshot = await getDocs(q); return !querySnapshot.empty;
+        };
+        async function saveData(question, answer) {
+            try { await addDoc(collection(db, "qna_data"), { question, answer, timestamp: new Date() }); }
+            catch (e) { console.error("Error saving document: ", e); addMessage("Error...", 'bot'); }
+        };
+        chatForm.addEventListener('submit', async (e) => {
+            e.preventDefault(); const inputText = userInput.value.trim(); if (inputText === '') return;
+            if (conversationState === 'waiting_for_question') {
+                const exists = await checkIfQuestionExists(inputText);
+                if (exists) { addMessage("Sir, aap ye question puch chuke hai...", 'bot'); userInput.value = ''; return; }
+                userQuestionToSave = inputText; addMessage(userQuestionToSave, 'user'); userInput.value = '';
+                setTimeout(() => { addMessage("Is question ka kya reply dena hai?", 'bot'); conversationState = 'waiting_for_answer'; }, 500);
+            } else if (conversationState === 'waiting_for_answer') {
+                const userAnswer = inputText; addMessage(userAnswer, 'user'); userInput.value = '';
+                await saveData(userQuestionToSave, userAnswer);
+                setTimeout(() => { addMessage("Mai samajh gaya, aage poochiye.", 'bot'); conversationState = 'waiting_for_question'; userQuestionToSave = ''; }, 500);
+            }
+        });
+        saveBulkBtn.onclick = async () => {
+            const text = bulkInput.value.trim(); if (text === '') { alert("Box khaali hai..."); return; }
+            const lines = text.split('\n').filter(line => line.trim() !== '');
+            const questions = {}; const answers = {}; const pairsToSave = [];
+            for (const line of lines) {
+                const match = line.match(/^(\d+)\.\s*(.*)/);
+                if (!match) { alert(`Error: Line format galat hai.\n"${line}"`); return; }
+                const number = match[1]; const content = match[2].trim();
+                if (!questions[number]) { questions[number] = content; } else if (!answers[number]) { answers[number] = content; }
+                else { alert(`Error: Number ${number} ke liye...`); return; }
+            }
+            for (const num in questions) {
+                if (answers[num]) { pairsToSave.push({ question: questions[num], answer: answers[num] }); }
+                else { alert(`Error: Question number ${num} ka answer nahi mila.`); return; }
+            }
+             if (Object.keys(answers).length > Object.keys(questions).length) { alert("Error: Kuch answers ke questions nahi mile..."); return; }
+            if (pairsToSave.length === 0) { alert("Koi bhi valid Q&A joda nahi mila..."); return; }
+            try {
+                const batch = writeBatch(db);
+                for (const pair of pairsToSave) {
+                    const docRef = collection(db, "qna_data").doc(); batch.set(docRef, { question: pair.question, answer: pair.answer, timestamp: new Date() });
+                }
+                await batch.commit(); alert(`${pairsToSave.length} Q&A jode... save ho gaye hain!`);
+                bulkInput.value = ''; bulkModal.style.display = 'none';
+            } catch (e) { alert("Database me save karte waqt error aaya: " + e); }
+        };
+        setTimeout(() => { addMessage("Welcome! Aap training ke liye questions and answers yahan daal sakte hain. Aap apna pehla sawal poochiye.", 'bot'); }, 500);
+
+    </script>
+</body>
+</html>
